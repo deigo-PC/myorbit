@@ -193,7 +193,7 @@ function score(t){
   if(t.blocker) s+=30;
   const p=projectOf(t);
   if(p&&FOCUS.includes(p)) s+=75; else if(p&&p===PRIME[new Date().getDay()]) s+=60;
-  if(p==="PayWise") s+=30; else if(p) s+=15;
+  else if(p) s+=15;                       // any named project gets a small nudge
   if(t.pinned) s+=10; if(t.state==="active") s+=8;
   if(t.priority===1) s+=20; else if(t.priority===2) s+=10;
   const a=daysAgo(t.moved||t.created);
