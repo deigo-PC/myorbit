@@ -146,17 +146,27 @@ textarea{min-height:76px;resize:vertical}
 
 <script>
 const API = "/api/plugins/panel";
-const AREAS = ["Clients","Coord Ops","InLimbo","Frogo","Portfolio","Coordenadas.co","Creativo",
-               "Personal & Admin","Plata","Compras","Buenos Aires","Talan","tech / learn","CasaSys & Lab"];
-// area colours, verified >=6.5:1 on the dark background (same palette as the desktop panel)
-const PAL = {"Creativo":"#DE7474","Compras":"#D47E3B","Plata":"#A79322","Portfolio":"#7D9F25",
-  "Frogo":"#2DA940","InLimbo":"#2CA772","Coord Ops":"#29A3A3","Clients":"#4C9AD5",
-  "Buenos Aires":"#7F8EE1","Coordenadas.co":"#9F85E0","Talan":"#C175DF","tech / learn":"#DA69C9",
-  "CasaSys & Lab":"#DD6F9F","Personal & Admin":"#8596A7"};
+// Whose panel this is lives on the SERVER (/api/plugins/panel/config), not here.
+// This client ships user-agnostic: no project names, no areas, no personal anything.
+let AREAS = [], PAL = {}, WORK = new Set(), FOCUS = [], PRIME = {};
+const PROJECT_KEYWORDS = {}, AREA_PROJECTS = {}, PERSONAL_AREAS = [];
+function fillAreas(){
+  const s = document.querySelector("#carea");
+  if (s) s.innerHTML = AREAS.map(a => `<option>${a}</option>`).join("");
+}
+function applyCfg(c){
+  c = c || {};
+  if (Array.isArray(c.areas) && c.areas.length) AREAS = c.areas;
+  PAL = c.palette || {};
+  WORK = new Set(c.work_areas || []);
+  FOCUS = c.focus_projects || [];
+  PRIME = c.prime_by_weekday || {};
+  Object.assign(PROJECT_KEYWORDS, c.project_keywords || {});
+  Object.assign(AREA_PROJECTS, c.area_projects || {});
+  PERSONAL_AREAS.length = 0; (c.personal_areas || []).forEach(a => PERSONAL_AREAS.push(a));
+  fillAreas();
+}
 const STATES = ["open","active","waiting","verify","parked","later"];
-const WORK = new Set(["Clients","InLimbo","Coord Ops","Portfolio","Creativo"]);
-const FOCUS = ["DropWorks","InLimbo"];   // what he said is main now
-const PRIME = {1:"DropWorks",2:"DropWorks",3:"Factronics",4:"Factronics"};  // Mon=1
 
 let tasks=[], editing=null;
 const $=s=>document.querySelector(s);
@@ -173,10 +183,8 @@ const daysAgo=iso=>{ if(!iso) return 999; const d=new Date(iso.slice(0,10)+"T00:
 
 function projectOf(t){
   const s=((t.title||"")+" "+(t.client||"")).toLowerCase();
-  if(s.includes("dropworks")||s.includes("half-click")) return "DropWorks";
-  if(s.includes("factronics")) return "Factronics";
-  if(s.includes("paywise")) return "PayWise";
-  if(t.area==="InLimbo"||s.includes("inlimbo")) return "InLimbo";
+  for (const [proj,kws] of Object.entries(PROJECT_KEYWORDS)) if (kws.some(k=>s.includes(k))) return proj;
+  for (const [area,proj] of Object.entries(AREA_PROJECTS)) if (t.area===area) return proj;
   return null;
 }
 function score(t){
@@ -240,7 +248,7 @@ function projectRings(){
 function render(){
   const td=todayISO();
   const mine=tasks.filter(t=>t.state!=="archived"&&t.state!=="done"
-      &&(WORK.has(t.area)||t.area==="Buenos Aires"||t.area==="Plata"||t.area==="Personal & Admin"));
+      &&(WORK.has(t.area)||PERSONAL_AREAS.includes(t.area)));
   const ranked=mine.slice().sort((a,b)=>score(b)-score(a));
   const seen=new Set(), today=[];
   for(const t of ranked){ const s=score(t); if(s<35) continue;
@@ -259,12 +267,12 @@ function render(){
     const k=(t.children||[]).length;
     month.push({t,why:k?`${(t.children||[]).filter(c=>c.done).length}/${k}`:(t.area||"").toLowerCase()});
     seen.add(t.id); if(month.length>=4) break; }
-  const personal=mine.filter(t=>["Personal & Admin","Plata"].includes(t.area))
+  const personal=mine.filter(t=>PERSONAL_AREAS.includes(t.area))
     .sort((a,b)=>daysAgo(a.moved)-daysAgo(b.moved)).slice(0,3)
     .map(t=>({t,why:(t.area||"").split(" ")[0].toLowerCase()}));
 
   $("#date").textContent=new Date().toLocaleDateString("es-CO",{weekday:"short",day:"2-digit",month:"short"});
-  $("#focus").textContent="ahora manda "+FOCUS.join(", ");
+  if($("#focus")) $("#focus").textContent = FOCUS.length ? ("ahora manda " + FOCUS.join(", ")) : "";
   $("#rings").innerHTML=projectRings();
   $("#body").innerHTML=group("HOY",today,true)+group("ESTA SEMANA",week)+group("ESTE MES",month)
     +group("PERSONAL",personal);
@@ -316,14 +324,21 @@ $("#shpark").onclick=async()=>{ await patch(editing.id,{state:"parked"}); $("#sh
 $("#shdel").onclick=async()=>{ if(!confirm("¿Borrar \""+editing.title+"\"? No se puede deshacer.")) return;
   await fetch(API+"/tasks/"+editing.id,{method:"DELETE"}); $("#sh").classList.remove("on"); toast("borrada"); await load(); };
 
-$("#carea").innerHTML=AREAS.map(a=>`<option>${a}</option>`).join("");
+fillAreas();
 $("#cadd").onclick=async()=>{
   const v=$("#cin").value.trim(); if(!v) return;
   await fetch(API+"/tasks",{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({title:v,area:$("#carea").value,domain:$("#carea").value.includes("Clients")?"Work":"deigo"})});
+    body:JSON.stringify({title:v,area:$("#carea").value})});
   $("#cin").value=""; toast("capturada"); await load();
 };
 $("#cin").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#cadd").click(); });
-load();
+(async () => {
+  // whose panel this is comes from the server; failures degrade to a plain feed
+  try {
+    const r = await fetch(API + "/config", {credentials: "same-origin"});
+    if (r.ok) applyCfg(await r.json());
+  } catch (e) { /* no config: still a usable feed */ }
+  load();
+})();
 </script>
 </body></html>

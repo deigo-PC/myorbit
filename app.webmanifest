@@ -1,7 +1,7 @@
 {
   "name": "MyOrbit",
   "short_name": "MyOrbit",
-  "description": "MyOrbit \u2014 deigo's tasks as a mobile app over the Hermes panel store.",
+  "description": "A phone-first feed client for a task store you run yourself.",
   "start_url": "/dashboard-plugins/panel/m.html",
   "scope": "/dashboard-plugins/panel/",
   "display": "standalone",
