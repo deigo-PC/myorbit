@@ -3,6 +3,8 @@
 A phone-first feed for a task store **you** host. One screen, usable with a thumb, so tasks get
 updated on the go instead of in a browser tab that never gets opened.
 
+[![MyOrbit on a phone](docs/screenshot.png)](docs/screenshot.png)
+
 - **Feed, not a board.** Today first, then the week, then the month, then a smaller personal block.
 - **Progress you can see.** Every active project gets a ring that fills. Rings are ordered by what is
   closest to done, because proximity to completion is what actually accelerates behaviour.
