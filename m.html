@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090A">
+<link rel="manifest" href="/api/plugins/panel/manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="192x192" href="/dashboard-plugins/panel/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="/dashboard-plugins/panel/icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/dashboard-plugins/panel/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MyOrbit">
+
+<title>MyOrbit</title>
+<style>
+:root{
+  --bg:#07090A; --panel:#0E1113; --panel2:#141819; --line:#20262A;
+  --ink:#E9EEF0; --ink2:#98A4AC; --ink3:#5C686F;
+  --red:#FF7A7A; --amber:#F5B942; --ok:#5BD98C;
+  --sans:'Poppins',system-ui,Helvetica,Arial,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+@font-face{font-family:Poppins;src:url("/api/plugins/panel/font/Poppins-400.woff2");font-weight:400}
+@font-face{font-family:Poppins;src:url("/api/plugins/panel/font/Poppins-500.woff2");font-weight:500}
+@font-face{font-family:Poppins;src:url("/api/plugins/panel/font/Poppins-600.woff2");font-weight:600}
+@font-face{font-family:'JetBrains Mono';src:url("/api/plugins/panel/font/JetBrainsMono-400.woff2");font-weight:400}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px}
+body{padding:18px 18px calc(104px + env(safe-area-inset-bottom))}
+h1{font-size:19px;font-weight:600;margin:0}
+.mono{font-family:var(--mono)}
+.meta{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+header{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+header .date{margin-left:auto}
+#focus{margin:6px 0 22px}
+
+/* ── rings: proximity to done is the motivator (goal-gradient effect) ───────── */
+.rings{display:flex;gap:14px;overflow-x:auto;padding:2px 18px 16px 0;scroll-snap-type:x proximity;margin-right:-18px}
+.rings::-webkit-scrollbar{display:none}
+.ring{flex:0 0 auto;width:86px;text-align:center;scroll-snap-align:start}
+.ring svg{display:block;margin:0 auto 7px}
+.ring .rl{font-size:11.5px;color:var(--ink2);line-height:1.25;height:2.6em;overflow:hidden}
+.ring .rn{font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:3px}
+
+/* ── sections ──────────────────────────────────────────────────────────────── */
+.gh{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);
+    padding:0 0 8px;border-bottom:1px solid var(--line);margin:26px 0 2px}
+.gh .n{color:var(--ink3)}
+/* the desktop card, mirrored: area tints the card, state paints the rail */
+.row{display:grid;grid-template-columns:1fr auto;gap:11px;align-items:center;background:color-mix(in srgb,var(--ar) 13%,var(--panel));border:1px solid color-mix(in srgb,var(--ar) 38%,transparent);border-left:3px solid var(--st);border-radius:12px;padding:12px 13px;margin-bottom:8px;cursor:pointer;transition:background .12s ease}
+.row:active{background:color-mix(in srgb,var(--ar) 24%,var(--panel))}
+.dot{width:10px;height:10px;border-radius:50%}
+.rt{font-size:16.5px;font-weight:500;line-height:1.25}
+.rt.big{font-size:23px;font-weight:600;letter-spacing:-.35px}
+.rt{font-size:15.5px}
+.rn2{font-size:13.5px;color:var(--ink2);margin-top:3px;line-height:1.35}
+.rn2.dim{font-family:var(--mono);font-size:11.5px;color:var(--ink3)}
+.rm{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink3);margin-top:4px;display:flex;gap:8px}
+.rm .a{color:var(--ar)}
+.done{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--panel);
+      color:var(--ink2);font-size:19px;display:flex;align-items:center;justify-content:center}
+.done:active{background:var(--ok);color:#07090A;border-color:var(--ok)}
+.row.hot .rt{color:var(--red)}
+
+/* ── capture: fixed in the thumb zone ──────────────────────────────────────── */
+#cap{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+     background:linear-gradient(180deg,rgba(7,9,10,0) 0%,var(--bg) 34%);display:flex;gap:8px;align-items:center}
+#cap input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+           padding:14px 15px;color:var(--ink);font-family:var(--sans);font-size:16px}
+#cap input::placeholder{color:var(--ink3)}
+#cap button{border:0;border-radius:14px;background:var(--ink);color:var(--bg);font-weight:600;
+            font-size:16px;padding:14px 18px}
+#cap select{background:var(--panel2);border:1px solid var(--line);color:var(--ink2);border-radius:14px;
+            padding:14px 10px;font-size:13px;max-width:34vw}
+
+/* ── edit sheet ────────────────────────────────────────────────────────────── */
+#sh{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;z-index:20}
+#sh.on{display:flex}
+.sheet{width:100%;max-height:88vh;overflow:auto;background:var(--panel);
+       border-radius:20px 20px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom))}
+.sheet h2{font-size:19px;font-weight:600;margin:0 0 4px}
+.sheet .sub{font-family:var(--mono);font-size:11px;color:var(--ink3);text-transform:uppercase;
+            letter-spacing:.14em;margin-bottom:18px}
+.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+     color:var(--ink3);margin:18px 0 8px}
+.states{display:flex;flex-wrap:wrap;gap:8px}
+.states button{border:1px solid var(--line);background:var(--panel2);color:var(--ink2);
+               border-radius:11px;padding:11px 13px;font-size:13.5px}
+.states button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+textarea,input.f{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+                 color:var(--ink);font-family:var(--sans);font-size:15.5px;padding:13px}
+textarea{min-height:76px;resize:vertical}
+.close{position:sticky;top:0;float:right;border:0;background:transparent;color:var(--ink3);font-size:26px;
+       line-height:1;padding:2px 6px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom));
+       background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:999px;
+       padding:9px 16px;font-size:13px;opacity:0;transition:opacity .18s;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <svg width="26" height="26" viewBox="0 0 64 64"><ellipse cx="32" cy="32" rx="26" ry="9.5" fill="none"
+     stroke="#F2A6CC" stroke-width="6" transform="rotate(-28 32 32)"/><circle cx="32" cy="32" r="9" fill="#C6A6F5"/></svg>
+  <h1>MyOrbit</h1>
+  <span class="meta date" id="date"></span>
+</header>
+<div class="meta" id="focus"></div>
+
+<div class="rings" id="rings"></div>
+<div id="body"></div>
+
+<div id="cap">
+  <input id="cin" placeholder="Nueva tarea…">
+  <select id="carea"></select>
+  <button id="cadd">+</button>
+</div>
+<div id="toast"></div>
+
+<div id="sh"><div class="sheet">
+  <button class="close" id="shx">&times;</button>
+  <h2 id="sht"></h2>
+  <div class="sub" id="shsub"></div>
+  <div class="lbl">Estado</div>
+  <div class="states" id="shs"></div>
+  <div class="lbl">Siguiente paso físico</div>
+  <textarea id="shn" placeholder="el siguiente paso concreto — esto es lo que la desatasca"></textarea>
+  <div class="lbl">Fecha</div>
+  <input class="f" id="shd" type="date">
+  <div class="lbl">Prioridad</div>
+  <div class="states" id="shp">
+    <button data-p="1">P1</button><button data-p="2">P2</button><button data-p="3">P3</button>
+    <button data-p="0">sin</button>
+  </div>
+  <div class="lbl">Acciones</div>
+  <div class="states">
+    <button id="shdone">marcar listo</button>
+    <button id="shpark">parquear</button>
+    <button id="shdel">borrar</button>
+  </div>
+</div></div>
+
+<script>
+const API = "/api/plugins/panel";
+const AREAS = ["Clients","Coord Ops","InLimbo","Frogo","Portfolio","Coordenadas.co","Creativo",
+               "Personal & Admin","Plata","Compras","Buenos Aires","Talan","tech / learn","CasaSys & Lab"];
+// area colours, verified >=6.5:1 on the dark background (same palette as the desktop panel)
+const PAL = {"Creativo":"#DE7474","Compras":"#D47E3B","Plata":"#A79322","Portfolio":"#7D9F25",
+  "Frogo":"#2DA940","InLimbo":"#2CA772","Coord Ops":"#29A3A3","Clients":"#4C9AD5",
+  "Buenos Aires":"#7F8EE1","Coordenadas.co":"#9F85E0","Talan":"#C175DF","tech / learn":"#DA69C9",
+  "CasaSys & Lab":"#DD6F9F","Personal & Admin":"#8596A7"};
+const STATES = ["open","active","waiting","verify","parked","later"];
+const WORK = new Set(["Clients","InLimbo","Coord Ops","Portfolio","Creativo"]);
+const FOCUS = ["DropWorks","InLimbo"];   // what he said is main now
+const PRIME = {1:"DropWorks",2:"DropWorks",3:"Factronics",4:"Factronics"};  // Mon=1
+
+let tasks=[], editing=null;
+const $=s=>document.querySelector(s);
+const col=t=>PAL[t.area]||"#8596A7";
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ST={open:"#98A4AC",active:"#6BA6FF",committed:"#6BA6FF",waiting:"#F5B942",pinned:"#F5B942",
+  verify:"#8B968F",shopping:"#8B968F",parked:"#FF7A7A",later:"#FF7A7A",done:"#5BD98C",off:"#5C686F"};
+const stc=t=>(ST[t.state]||ST.open);
+const cut=(s,n)=>{ s=String(s||""); if(s.length<=n) return s;
+  const c=s.slice(0,n); return c.slice(0,Math.max(c.lastIndexOf(" "),n-14)).replace(/[,;:.·—-]+$/,"")+"…"; };
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const daysAgo=iso=>{ if(!iso) return 999; const d=new Date(iso.slice(0,10)+"T00:00:00");
+  return Math.round((new Date(todayISO()+"T00:00:00")-d)/864e5); };
+
+function projectOf(t){
+  const s=((t.title||"")+" "+(t.client||"")).toLowerCase();
+  if(s.includes("dropworks")||s.includes("half-click")) return "DropWorks";
+  if(s.includes("factronics")) return "Factronics";
+  if(s.includes("paywise")) return "PayWise";
+  if(t.area==="InLimbo"||s.includes("inlimbo")) return "InLimbo";
+  return null;
+}
+function score(t){
+  let s=0; const d=t.due?t.due.slice(0,10):null, td=todayISO();
+  if(d&&d<td) s+=100; else if(d===td) s+=90;
+  if(t.blocker) s+=30;
+  const p=projectOf(t);
+  if(p&&FOCUS.includes(p)) s+=75; else if(p&&p===PRIME[new Date().getDay()]) s+=60;
+  if(p==="PayWise") s+=30; else if(p) s+=15;
+  if(t.pinned) s+=10; if(t.state==="active") s+=8;
+  if(t.priority===1) s+=20; else if(t.priority===2) s+=10;
+  const a=daysAgo(t.moved||t.created);
+  if(a<=2) s+=18; else if(a<=7) s+=10; else if(a>60) s-=25;
+  return s;
+}
+function ringSVG(done,total){
+  const R=26, C=2*Math.PI*R, pct=total?done/total:0;      // real progress
+  const shown=Math.max(pct, total&&done===0?0.08:0);       // a small head start: the effect is proximity
+  return `<svg width="66" height="66" viewBox="0 0 66 66">
+    <circle cx="33" cy="33" r="${R}" fill="none" stroke="#141819" stroke-width="7"/>
+    <circle cx="33" cy="33" r="${R}" fill="none" stroke="currentColor" stroke-width="7"
+      stroke-linecap="round" stroke-dasharray="${(C*shown).toFixed(1)} ${C.toFixed(1)}"
+      transform="rotate(-90 33 33)"/></svg>`;
+}
+function row(t,why,hot,size){
+  const nxt=(t.next_action||"").split(/\n+/).filter(l=>!/https?:\/\//.test(l))
+    .join(" ").replace(/(^|\s)[*·•]+\s*/g," ").replace(/\s{2,}/g," ").trim();
+  const n=nxt?`<div class="rn2">${esc(nxt.slice(0,110))}</div>`
+    :(t.state==="verify"?`<div class="rn2">verificar y cerrar</div>`
+    :`<div class="rn2 dim">sin paso — toca para escribirlo</div>`);
+  return `<div class="row${hot?" hot":""}" data-id="${t.id}" style="--ar:${col(t)};--st:${stc(t)}">
+    
+    <div><div class="rt${size?" big":""}">${esc(cut((t.title||"").replace(/\s*\*\([^)]*\)\*\s*$/,"").replace(/\s*[—-]\s*(?=[A-Z])/," · "), size?46:44))}</div>${n}
+      <div class="rm"><span class="a">${esc(t.area||"")}</span><span>${esc(t.state||"open")}</span>
+      ${t.priority?`<span>P${t.priority}</span>`:""}<span style="margin-left:auto">${esc(
+        (String(why||"").toLowerCase()===(t.area||"").toLowerCase().split(" ")[0])?"":why)}</span></div></div>
+    <button class="done" data-done="${t.id}">&#10003;</button></div>`;
+}
+function group(label,items,size){
+  if(!items.length) return "";
+  return `<div class="gh"><span>${label}</span><span class="n">${items.length}</span></div>`
+    + items.map(i=>row(i.t,i.why,i.hot,size&&i.big)).join("");
+}
+function projectRings(){
+  const kids=t=>Array.isArray(t.children)?t.children:[];
+  const nl=t=>((t.children||[]).length - (t.children||[]).filter(c=>c.done).length);
+  const projs=tasks.filter(t=>kids(t).length&&t.state!=="archived"&&t.state!=="done")
+    .map(t=>({t, pct:(t.children||[]).filter(c=>c.done).length/((t.children||[]).length||1),
+              left:nl(t)}))
+    .filter(x=>x.left<=6)                       // a ring with 40 things left is not a motivator
+    .sort((a,b)=> b.pct-a.pct || a.left-b.left) // nearest to done first
+    .slice(0,4).map(x=>x.t);
+  if(!projs.length) return "";
+  return `<div class="rings">`+projs.map(t=>{
+    const k=kids(t), d=k.filter(c=>c.done).length;
+    return `<div class="ring" style="color:${col(t)}" data-id="${t.id}">
+      ${ringSVG(d,k.length)}
+      <div class="rl">${esc(t.title.replace(/^[^—]*—\s*/,"").slice(0,26))}</div>
+      <div class="rn">${d}/${k.length}</div></div>`;}).join("")+`</div>`;
+}
+function render(){
+  const td=todayISO();
+  const mine=tasks.filter(t=>t.state!=="archived"&&t.state!=="done"
+      &&(WORK.has(t.area)||t.area==="Buenos Aires"||t.area==="Plata"||t.area==="Personal & Admin"));
+  const ranked=mine.slice().sort((a,b)=>score(b)-score(a));
+  const seen=new Set(), today=[];
+  for(const t of ranked){ const s=score(t); if(s<35) continue;
+    today.push({t,why:(t.due&&t.due.slice(0,10)<td)?"vencida":(t.due&&t.due.slice(0,10)===td)?"hoy":
+      (projectOf(t)&&FOCUS.includes(projectOf(t)))?"principal":t.blocker?"bloqueada":
+      (t.area||"").toLowerCase(),hot:!!(t.due&&t.due.slice(0,10)<=td)});
+    seen.add(t.id); if(today.length>=4) break; }
+  // one big row per focus project, so the two #1s stay equal
+  const bigdone=new Set();
+  today.forEach(i=>{ const p=projectOf(i.t);
+    if(p&&FOCUS.includes(p)&&!bigdone.has(p)){ i.big=true; bigdone.add(p); } });
+  const week=ranked.filter(t=>!seen.has(t.id)&&projectOf(t)).slice(0,4)
+    .map(t=>({t,why:(t.state||"").toLowerCase()}));
+  const month=[];
+  for(const t of ranked){ if(seen.has(t.id)||week.find(w=>w.t.id===t.id)) continue;
+    const k=(t.children||[]).length;
+    month.push({t,why:k?`${(t.children||[]).filter(c=>c.done).length}/${k}`:(t.area||"").toLowerCase()});
+    seen.add(t.id); if(month.length>=4) break; }
+  const personal=mine.filter(t=>["Personal & Admin","Plata"].includes(t.area))
+    .sort((a,b)=>daysAgo(a.moved)-daysAgo(b.moved)).slice(0,3)
+    .map(t=>({t,why:(t.area||"").split(" ")[0].toLowerCase()}));
+
+  $("#date").textContent=new Date().toLocaleDateString("es-CO",{weekday:"short",day:"2-digit",month:"short"});
+  $("#focus").textContent="ahora manda "+FOCUS.join(", ");
+  $("#rings").innerHTML=projectRings();
+  $("#body").innerHTML=group("HOY",today,true)+group("ESTA SEMANA",week)+group("ESTE MES",month)
+    +group("PERSONAL",personal);
+  document.querySelectorAll("[data-id]").forEach(el=>el.addEventListener("click",e=>{
+    if(e.target.dataset.done) return; open(el.dataset.id); }));
+  document.querySelectorAll("[data-done]").forEach(b=>b.addEventListener("click",async e=>{
+    e.stopPropagation(); await patch(b.dataset.done,{state:"done"}); toast("listo"); }));
+}
+async function load(){
+  const r = await fetch(API+"/tasks", {credentials:"same-origin"});
+  const d = await r.json();
+  tasks = Array.isArray(d) ? d : (d.rows || []);
+  render();
+}
+async function patch(id,body){
+  await fetch(API+"/tasks/"+id,{method:"PATCH",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)});
+  await load();
+}
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("on");
+  setTimeout(()=>t.classList.remove("on"),1400); }
+function open(id){
+  editing=tasks.find(t=>t.id===id); if(!editing) return;
+  $("#sht").textContent=editing.title;
+  $("#shsub").textContent=[editing.id,editing.area,editing.state].filter(Boolean).join(" · ");
+  $("#shs").innerHTML=STATES.map(s=>`<button data-s="${s}" aria-pressed="${editing.state===s}">${s}</button>`).join("");
+  $("#shn").value=editing.next_action||"";
+  $("#shd").value=(editing.due||"").slice(0,10);
+  $("#shp").querySelectorAll("button").forEach(b=>
+    b.setAttribute("aria-pressed",String(String(editing.priority||0)===b.dataset.p)));
+  $("#sh").classList.add("on");
+}
+$("#shx").onclick=()=>$("#sh").classList.remove("on");
+$("#sh").addEventListener("click",e=>{ if(e.target.id==="sh") $("#sh").classList.remove("on"); });
+document.addEventListener("click",async e=>{
+  const sb=e.target.closest("#shs button");
+  if(sb){ const s=sb.dataset.s; $("#shs").querySelectorAll("button").forEach(b=>
+      b.setAttribute("aria-pressed",String(b===sb))); await patch(editing.id,{state:s}); return; }
+  const pb=e.target.closest("#shp button");
+  if(pb){ const p=Number(pb.dataset.p);
+    $("#shp").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===pb)));
+    await patch(editing.id,{priority:p||null}); return; }
+});
+$("#shn").addEventListener("blur",()=>{ if(editing&&$("#shn").value!==(editing.next_action||""))
+  patch(editing.id,{next_action:$("#shn").value}); });
+$("#shd").addEventListener("change",()=>{ if(editing) patch(editing.id,{due:$("#shd").value||null}); });
+$("#shdone").onclick=async()=>{ await patch(editing.id,{state:"done"}); $("#sh").classList.remove("on"); toast("listo"); };
+$("#shpark").onclick=async()=>{ await patch(editing.id,{state:"parked"}); $("#sh").classList.remove("on"); toast("parqueada"); };
+$("#shdel").onclick=async()=>{ if(!confirm("¿Borrar \""+editing.title+"\"? No se puede deshacer.")) return;
+  await fetch(API+"/tasks/"+editing.id,{method:"DELETE"}); $("#sh").classList.remove("on"); toast("borrada"); await load(); };
+
+$("#carea").innerHTML=AREAS.map(a=>`<option>${a}</option>`).join("");
+$("#cadd").onclick=async()=>{
+  const v=$("#cin").value.trim(); if(!v) return;
+  await fetch(API+"/tasks",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({title:v,area:$("#carea").value,domain:$("#carea").value.includes("Clients")?"Work":"deigo"})});
+  $("#cin").value=""; toast("capturada"); await load();
+};
+$("#cin").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#cadd").click(); });
+load();
+</script>
+</body></html>
