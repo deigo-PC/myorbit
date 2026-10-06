@@ -1,0 +1,70 @@
+{
+  "name": "MyOrbit",
+  "short_name": "MyOrbit",
+  "areas": [
+    "Website",
+    "Admin",
+    "Clients",
+    "Learning",
+    "Personal & Admin",
+    "Home"
+  ],
+  "palette": {
+    "Website": "#4C9AD5",
+    "Admin": "#29A3A3",
+    "Clients": "#2CA772",
+    "Learning": "#9F85E0",
+    "Personal & Admin": "#8596A7",
+    "Home": "#DD6F9F"
+  },
+  "work_areas": [
+    "Website",
+    "Admin",
+    "Clients"
+  ],
+  "focus_projects": [
+    "Relaunch"
+  ],
+  "prime_by_weekday": {
+    "1": "Relaunch",
+    "2": "Relaunch",
+    "3": "Invoice cleanup",
+    "4": "Invoice cleanup"
+  },
+  "project_keywords": {
+    "Relaunch": [
+      "relaunch",
+      "pricing page"
+    ],
+    "Invoice cleanup": [
+      "invoice",
+      "reconcil"
+    ]
+  },
+  "area_projects": {},
+  "personal_areas": [
+    "Personal & Admin",
+    "Learning",
+    "Home"
+  ],
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,50 +1,64 @@
 # MyOrbit
 
-A phone-first feed client for a task store you run yourself. One screen, usable with a thumb, so tasks
-get updated on the go instead of in a browser tab that never gets opened.
+A phone-first feed for a task store **you** host. One screen, usable with a thumb, so tasks get
+updated on the go instead of in a browser tab that never gets opened.
 
-It is a **client**. It calls a small JSON API and renders whatever comes back. No database, no state of
-its own, no third-party services.
+- **Feed, not a board.** Today first, then the week, then the month, then a smaller personal block.
+- **Progress you can see.** Every active project gets a ring that fills. Rings are ordered by what is
+  closest to done, because proximity to completion is what actually accelerates behaviour.
+- **Your data stays yours.** The client holds no state. It talks to a small JSON API you run.
 
-## Files
+## Quick start
 
-| file | why |
-|---|---|
-| `m.html` | the whole client — vanilla JS, no build step |
-| `app.webmanifest` | makes "Add to Home screen" pin the exact page and open it standalone |
-| `icon-*.png`, `icon.svg` | app icons, hosted here because the URLs must be **public** (see below) |
-
-## Why the icons live in a public repo
-
-Android mints an installed web app's icon from the manifest **on Google's servers**, which fetch the
-icon URLs with no cookies and no session. Point those URLs at anything behind a login and the fetch
-returns a login page, so the launcher silently draws its own placeholder. A public raw URL is the
-simplest honest fix. Icons are the only thing here that has to be public — **no data ever is.**
-
-## The config contract
-
-The client carries no project names, no area names, nothing personal. It fetches its configuration at
-runtime from `GET <api>/config` and degrades to a plain feed if that returns nothing:
-
-```json
-{
-  "areas":            ["…area names shown in the capture picker…"],
-  "palette":          { "an area": "#RRGGBB" },
-  "work_areas":       ["…areas counted as work…"],
-  "focus_projects":   ["…projects that should dominate the feed…"],
-  "prime_by_weekday": { "1": "a project" },
-  "project_keywords": { "a project": ["substrings that identify it"] },
-  "area_projects":    { "an area": "a project" },
-  "personal_areas":   ["…areas shown in their own smaller block…"]
-}
+```bash
+git clone https://github.com/deigo-PC/myorbit && cd myorbit
+python3 server/server.py          # stdlib only, no pip install
+# open http://127.0.0.1:8787/
 ```
-Keeping that server-side means this file can be public while the thing it runs against stays private.
+It seeds `server/store.json` and `server/config.json` from the examples on first run. Edit those,
+hit reload, done.
 
-## Design notes worth keeping
+## Layout
 
-- Cards: the **area** tints the card (`color-mix`), the **state** paints the left rail. Colour carries
-  meaning, so two different things never share a colour by accident.
-- Progress rings are ordered **nearest-to-done first**, each with a small deliberate head start. That is
-  the goal-gradient effect: proximity to completion is what accelerates behaviour, not raw score.
+```
+client/   the whole client — m.html (vanilla JS, no build step) + the manifest
+server/   server.py: reference backend, one file, standard library only
+          store.example.json · config.example.json
+docs/     QUICKSTART · ARCHITECTURE · ROADMAP
+assets/   app icons
+```
+
+## How it fits together
+
+```
+   phone / browser
+        │  GET /api/tasks · PATCH /api/tasks/t001 · POST /api/config…
+        ▼
+   your server ──────► store.json     (the only state)
+        │             config.json     (areas, palette, focus, personal block)
+        └── serves the client + manifest
+```
+The client reads **all** its vocabulary — area names, colours, which projects matter, which areas are
+personal — from `GET /api/config` at runtime. That is why the client can be shared publicly while the
+thing it runs against stays private.
+
+`server/server.py` is the reference implementation, and this same client also mounts as a plugin tab
+in a Hermes dashboard (that is how the original runs). Same contract either way.
+
+## Design principles
+
+- **Colour carries meaning.** The area tints the card, the state paints the left rail. Two different
+  things never share a colour by accident.
+- **Size encodes priority.** The items that matter most are physically bigger.
+- **Heat, not guilt.** A stalled task invites a next step by naming the exact action; it never goes red.
+  Red is reserved for real dates.
 - **No streaks.** A streak's escalating cost turns a tool into a nag.
-- A stalled task invites a next step by naming the exact action instead of shaming the gap.
+- **Nothing is deleted by a tap you did not mean.** Archive is the default exit; delete is confirmed.
+
+## Status
+
+Early and openly evolving — the UI changes as it gets used daily. See `docs/ROADMAP.md`.
+
+## License
+
+MIT. Do what you like with it.

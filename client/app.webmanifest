@@ -1,28 +1,28 @@
 {
   "name": "MyOrbit",
   "short_name": "MyOrbit",
-  "description": "A phone-first feed client for a task store you run yourself.",
-  "start_url": "/dashboard-plugins/panel/m.html",
-  "scope": "/dashboard-plugins/panel/",
+  "description": "A phone-first feed for a task store you host yourself.",
+  "start_url": "m.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#07090A",
   "theme_color": "#07090A",
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/deigo-PC/myorbit/main/icon-192.png",
+      "src": "../assets/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://raw.githubusercontent.com/deigo-PC/myorbit/main/icon-512.png",
+      "src": "../assets/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://raw.githubusercontent.com/deigo-PC/myorbit/main/icon-maskable-512.png",
+      "src": "../assets/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

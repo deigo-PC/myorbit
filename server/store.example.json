@@ -1,0 +1,138 @@
+{
+  "rows": [
+    {
+      "id": "t001",
+      "title": "Relaunch — ship the new pricing page",
+      "domain": "Work",
+      "area": "Website",
+      "state": "active",
+      "kind": "project",
+      "next_action": "copy pass on the hero",
+      "due": "2026-10-14",
+      "priority": 1,
+      "moved": "2026-10-06",
+      "created": "2026-09-20",
+      "children": [
+        {
+          "title": "hero copy",
+          "done": true
+        },
+        {
+          "title": "pricing table",
+          "done": true
+        },
+        {
+          "title": "FAQ",
+          "done": false
+        },
+        {
+          "title": "redirects",
+          "done": false
+        },
+        {
+          "title": "analytics",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "t002",
+      "title": "Invoice cleanup — close the open quarter",
+      "domain": "Work",
+      "area": "Admin",
+      "state": "active",
+      "kind": "project",
+      "next_action": "reconcile the two unmatched payments",
+      "due": "2026-10-09",
+      "priority": 2,
+      "moved": "2026-10-05",
+      "created": "2026-09-28",
+      "children": [
+        {
+          "title": "export",
+          "done": true
+        },
+        {
+          "title": "match",
+          "done": true
+        },
+        {
+          "title": "file",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "t003",
+      "title": "Reply to the client about the shoot dates",
+      "domain": "Work",
+      "area": "Clients",
+      "state": "waiting",
+      "kind": "task",
+      "blocker": "waiting on their availability",
+      "next_action": "send the two options",
+      "due": "2026-10-07",
+      "priority": 1,
+      "moved": "2026-10-04"
+    },
+    {
+      "id": "t004",
+      "title": "Book the dentist",
+      "domain": "Personal",
+      "area": "Personal & Admin",
+      "state": "open",
+      "kind": "task",
+      "moved": "2026-09-30"
+    },
+    {
+      "id": "t005",
+      "title": "Read the two papers on spaced repetition",
+      "domain": "Personal",
+      "area": "Learning",
+      "state": "open",
+      "kind": "task",
+      "next_action": "skim and keep notes",
+      "moved": "2026-09-29",
+      "children": [
+        {
+          "title": "paper one",
+          "done": true
+        },
+        {
+          "title": "paper two",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": "t006",
+      "title": "Fix the leaking tap in the bathroom",
+      "domain": "Personal",
+      "area": "Home",
+      "state": "parked",
+      "kind": "task",
+      "moved": "2026-09-15"
+    },
+    {
+      "id": "t007",
+      "title": "Backup drives — verify the archive is readable",
+      "domain": "Personal",
+      "area": "Home",
+      "state": "open",
+      "kind": "task",
+      "next_action": "mount and checksum the last set",
+      "moved": "2026-10-01",
+      "pinned": true
+    },
+    {
+      "id": "t008",
+      "title": "Quarterly review — what actually moved",
+      "domain": "Work",
+      "area": "Admin",
+      "state": "open",
+      "kind": "task",
+      "due": "2026-10-31",
+      "moved": "2026-10-02"
+    }
+  ]
+}
